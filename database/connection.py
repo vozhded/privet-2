@@ -1,5 +1,31 @@
 from beanie import init_beanie
 from motor.motor_asyncio import AsyncIOMotorClient
+from models.user import User
+from models.event import Event
+
+client = AsyncIOMotorClient("mongodb://localhost:27017")
+db = client.planner
+
+async def init_db():
+    await init_beanie(database=db, document_models=[User, Event])
+    
+'''
+from beanie import init_beanie
+from motor.motor_asyncio import AsyncIOMotorClient
+from models.users import User
+from models.events import Event
+
+client = AsyncIOMotorClient("mongodb://127.0.0.1:27017")
+db = client.planner
+
+async def init_db():
+    await init_beanie(database=db, document_models=[User, Event])
+
+
+
+
+from beanie import init_beanie
+from motor.motor_asyncio import AsyncIOMotorClient
 from typing import Optional
 from pydantic import BaseSettings
 
@@ -12,7 +38,9 @@ async def initialize_database(self):
     document_models=[])
 class Config:
     env_file = ".env"
-'''
+
+
+
 from sqlmodel import SQLModel, create_engine, Session
 
 DATABASE_URL = "sqlite:///planner.db"  # Или "sqlite:///database.db" по методичке

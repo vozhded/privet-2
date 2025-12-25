@@ -1,3 +1,16 @@
+from beanie import Document
+from datetime import datetime
+from typing import Optional
+
+class Event(Document):
+    title: str
+    description: Optional[str] = None
+    date_time: datetime
+    owner_id: str
+
+    class Settings:
+        name = "events"
+'''
 from sqlmodel import SQLModel, Field, Relationship, JSON, Column
 from typing import TYPE_CHECKING, Optional, List
 from datetime import datetime
@@ -49,7 +62,6 @@ class EventUpdate(SQLModel):  # Из методички для частичны�
                 "date_time": "2025-11-05T10:00:00"
             }
         }
-'''
 from pydantic import BaseModel
 from datetime import datetime
 from typing import Optional

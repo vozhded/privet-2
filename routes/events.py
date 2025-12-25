@@ -1,3 +1,56 @@
+from fastapi import APIRouter, HTTPException, status
+from models.event import Event
+from models.user import User
+from typing import List
+
+router = APIRouter(prefix="/events", tags=["events"])
+
+@router.post("/", response_model=dict, status_code=status.HTTP_201_CREATED)
+async def add_event(event: Event):
+    inserted_event = await event.insert()
+    user = await User.get(event.owner_id)
+    if user:
+        user.events.append(inserted_event.dict())
+        await user.save()
+    return {"message": "Event added successfully by Vazhov Dmitrii."}
+
+@router.get("/", response_model=List[Event])
+async def retrieve_events():
+    return await Event.find_all().to_list()
+
+@router.get("/{event_id}", response_model=Event)
+async def get_single_event(event_id: str):
+    event = await Event.get(event_id)
+    if not event:
+        raise HTTPException(status_code=404, detail="Event with supplied ID doesn't exist.")
+    return event
+
+@router.put("/{event_id}", response_model=dict)
+async def update_event(event_id: str, updated_event: Event):
+    event = await Event.get(event_id)
+    if not event:
+        raise HTTPException(status_code=404, detail="Event with supplied ID doesn't exist.")
+    await event.update({"$set": updated_event.dict(exclude_unset=True)})
+    user = await User.get(event.owner_id)
+    if user:
+        for i, e in enumerate(user.events):
+            if e["id"] == event_id:
+                user.events[i] = updated_event.dict()
+        await user.save()
+    return {"message": "Event updated successfully by Vazhov Dmitrii."}
+
+@router.delete("/{event_id}", status_code=status.HTTP_204_NO_CONTENT)
+async def delete_event(event_id: str):
+    event = await Event.get(event_id)
+    if not event:
+        raise HTTPException(status_code=404, detail="Event with supplied ID doesn't exist.")
+    await event.delete()
+    user = await User.get(event.owner_id)
+    if user:
+        user.events = [e for e in user.events if e["id"] != event_id]
+        await user.save()
+    return {"message": "Event deleted successfully by Vazhov Dmitrii."}
+'''
 from fastapi import APIRouter, Depends, HTTPException
 from sqlmodel import select
 from models.events import Event, EventUpdate
@@ -25,11 +78,11 @@ async def read_one(event_id: int, db=Depends(get_db)):
     return event
 
 @router.put("/{event_id}", response_model=Event)
-async def update(event_id: int, updated: EventUpdate, db=Depends(get_db)):  # Изменено на EventUpdate
+async def update(event_id: int, updated: EventUpdate, db=Depends(get_db)):  
     event = db.get(Event, event_id)
     if not event:
         raise HTTPException(404, "Event not found")
-    event_data = updated.dict(exclude_unset=True)  # Только изменённые поля
+    event_data = updated.dict(exclude_unset=True)  
     for key, value in event_data.items():
         setattr(event, key, value)
     db.add(event)
@@ -45,7 +98,7 @@ async def delete(event_id: int, db=Depends(get_db)):
     db.delete(event)
     db.commit()
     return {"message": "Event deleted"}
-'''
+
 from fastapi import APIRouter, Path, HTTPException, status
 from models.events import Event
 from typing import List
@@ -81,7 +134,7 @@ async def get_event(event_id: int = Path(..., title="ID of the event")):
             return event
     raise HTTPException(status_code=404, detail="Event not found")
 
-# ИСПРАВЛЕНО: updated_event ПЕРЕД event_id
+
 @router.put("/{event_id}", response_model=Event)
 async def update_event(updated_event: Event, event_id: int = Path(..., title="The ID of the event to update")):
     for i, event in enumerate(events_db):

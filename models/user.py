@@ -1,3 +1,22 @@
+from beanie import Document
+from pydantic import EmailStr
+from typing import List
+
+class User(Document):
+    email: EmailStr
+    password: str
+    events: List[dict] = []
+
+    class Settings:
+        name = "users"
+
+class UserSignIn(User):
+    pass
+
+class UserOut(User):
+    id: str
+
+'''
 from sqlmodel import SQLModel, Field, Relationship
 from pydantic import EmailStr
 from typing import TYPE_CHECKING, Optional, List
@@ -35,7 +54,9 @@ class UserSignIn(SQLModel):
 class UserOut(SQLModel):
     id: int
     email: EmailStr
-'''
+
+
+
 from pydantic import BaseModel, EmailStr
 from typing import Optional
 
