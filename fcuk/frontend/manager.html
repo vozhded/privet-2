@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="ru">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Панель менеджера</title>
+    <link rel="stylesheet" href="style.css" />
+    <link href="https://fonts.googleapis.com/css2?family=DotGothic16&display=swap" rel="stylesheet">
+</head>
+
+<body>
+    <header class="header">
+        <div class="container header__inner">
+            <div class="logo">
+                <img src="images/logo.png" alt="Logo" class="logo__img">
+            </div>
+            <nav class="nav">
+                <a href="index.html" class="nav__link">Главная</a>
+            </nav>
+            <div class="auth-buttons">
+                <span style="color: #fff; font-size: 20px; margin-right: 20px;">Менеджер</span>
+                <a href="#" id="logoutBtn" class="btn-secondary">Выйти</a>
+            </div>
+        </div>
+    </header>
+
+    <section class="hero" style="padding: 80px 0; background: none;">
+        <div class="container">
+            <div class="auth-card" style="max-width: 1200px;">
+                <h2 class="section-title" style="text-align: center; margin-bottom: 40px;">Все заказы</h2>
+                <div id="ordersTable" style="min-height: 200px;">
+                    <p style="text-align: center; opacity: 0.8;">Загрузка заказов...</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <script>
+        function getAuthHeaders() {
+            const token = localStorage.getItem('access_token');
+            if (!token) {
+                alert('Сессия истекла. Войдите заново.');
+                window.location.href = 'login.html';
+                return {};
+            }
+            return { 'Authorization': `Bearer ${token}` };
+        }
+
+        async function loadManagerOrders() {
+            const container = document.getElementById('ordersTable');
+            container.innerHTML = '<p style="text-align: center; opacity: 0.8;">Загрузка...</p>';
+
+            try {
+                const res = await fetch('http://127.0.0.1:8000/admin/orders', {
+                    headers: getAuthHeaders()
+                });
+
+                if (!res.ok) {
+                    if (res.status === 401 || res.status === 403) {
+                        localStorage.removeItem('access_token');
+                        window.location.href = 'login.html';
+                    }
+                    throw new Error(`Ошибка ${res.status}: ${await res.text()}`);
+                }
+
+                const orders = await res.json();
+
+                if (orders.length === 0) {
+                    container.innerHTML = '<p style="text-align: center; opacity: 0.8;">Заказов пока нет</p>';
+                    return;
+                }
+
+                container.innerHTML = orders.map(o => `
+                    <div style="background: rgba(255,255,255,0.1); padding: 20px; border-radius: 20px; margin-bottom: 20px;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 20px;">
+                            <div>
+                                <strong>Заказ #${o.id}</strong> — ${o.status.toUpperCase()}<br>
+                                Клиент: ${o.user?.username || o.user?.email || 'Неизвестно'}<br>
+                                Создан: ${new Date(o.created_at).toLocaleString('ru-RU')}<br>
+                                Позиций: ${o.items?.length || 0} | Сумма: ${o.total_price || 0} ₽
+                            </div>
+                            <div>
+                                <label>Статус:</label>
+                                <select onchange="changeStatus(${o.id}, this.value)" style="padding: 8px 12px; border-radius: 8px; background: rgba(0,0,0,0.3); color: white; border: 1px solid #444;">
+                                    <option value="new" ${o.status === 'new' ? 'selected' : ''}>new</option>
+                                    <option value="processing" ${o.status === 'processing' ? 'selected' : ''}>processing</option>
+                                    <option value="printing" ${o.status === 'printing' ? 'selected' : ''}>printing</option>
+                                    <option value="packing" ${o.status === 'packing' ? 'selected' : ''}>packing</option>
+                                    <option value="shipped" ${o.status === 'shipped' ? 'selected' : ''}>shipped</option>
+                                    <option value="completed" ${o.status === 'completed' ? 'selected' : ''}>completed</option>
+                                    <option value="cancelled" ${o.status === 'cancelled' ? 'selected' : ''}>cancelled</option>
+                                </select>
+                            </div>
+                        </div>
+                        ${o.comment ? `<p style="margin-top: 10px; opacity: 0.8;"><small>Комментарий: ${o.comment}</small></p>` : ''}
+                        ${o.items?.length ? `<p style="margin-top: 10px;">Товары: ${o.items.map(item => item.original_name + ' × ' + item.quantity).join(', ')}</p>` : ''}
+                    </div>
+                `).join('');
+            } catch (err) {
+                console.error(err);
+                container.innerHTML = `<p style="color: #FF3B30;">Ошибка: ${err.message}</p>`;
+            }
+        }
+
+        async function changeStatus(orderId, newStatus) {
+            console.log(`Изменяем статус заказа #${orderId} на ${newStatus}`);
+
+            try {
+                const res = await fetch(`http://127.0.0.1:8000/admin/orders/${orderId}/status`, {
+                    method: 'PATCH',
+                    headers: {
+                        ...getAuthHeaders(),
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ new_status: newStatus })  // ← КЛЮЧЕВОЕ ИСПРАВЛЕНИЕ: объект с ключом new_status
+                });
+
+                if (res.ok) {
+                    console.log('Статус успешно изменён');
+                    loadManagerOrders();  // перезагружаем список
+                } else {
+                    const errText = await res.text();
+                    console.error('Ошибка сервера:', res.status, errText);
+                    alert(`Ошибка: ${res.status} — ${errText}`);
+                }
+            } catch (e) {
+                console.error('Ошибка fetch:', e);
+                alert('Ошибка сети');
+            }
+        }
+
+        // Выход
+        document.getElementById('logoutBtn').addEventListener('click', e => {
+            e.preventDefault();
+            if (confirm('Выйти?')) {
+                localStorage.removeItem('access_token');
+                window.location.href = 'index.html';
+            }
+        });
+
+        document.addEventListener('DOMContentLoaded', () => {
+            loadManagerOrders();
+        });
+    </script>
+</body>
+
+</html>

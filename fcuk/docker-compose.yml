@@ -1,0 +1,41 @@
+version: '3.9'
+
+services:
+  db:
+    image: postgres:16
+    container_name: postgres_3dprint
+    restart: always
+    environment:
+      POSTGRES_DB: 3dprint
+      POSTGRES_USER: 3dprint_user
+      POSTGRES_PASSWORD: supersecretpassword
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - print_network # опционально, для изоляции
+
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    container_name: pgadmin_3dprint
+    restart: always
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@example.com # замените на свой email
+      PGADMIN_DEFAULT_PASSWORD: admin # замените на надёжный пароль
+    ports:
+      - "5050:80" # локальный порт 5050 ведёт на 80 в контейнере
+    volumes:
+      - pgadmin_data:/var/lib/pgadmin # сохраняем настройки pgAdmin между перезапусками
+    depends_on:
+      - db # ждём, пока БД запустится
+    networks:
+      - print_network
+
+volumes:
+  postgres_data:
+  pgadmin_data:
+    # новый volume для pgAdmin
+
+networks:
+  print_network: # общая сеть для сервисов

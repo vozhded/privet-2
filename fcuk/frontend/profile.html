@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="ru">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Личный кабинет | 3D Print Platform</title>
+    <link rel="stylesheet" href="style.css" />
+    <link href="https://fonts.googleapis.com/css2?family=DotGothic16&display=swap" rel="stylesheet">
+</head>
+
+<body>
+    <header class="header">
+        <div class="container header__inner">
+            <div class="logo">
+                <img src="images/logo.png" alt="Logo" class="logo__img">
+            </div>
+            <nav class="nav">
+                <a href="index.html" class="nav__link">Главная</a>
+                <a href="#" class="nav__link">Цены</a>
+                <a href="#" class="nav__link">Услуги</a>
+                <a href="#" class="nav__link">Контакты</a>
+            </nav>
+
+            <div class="auth-buttons">
+                <a href="#" class="nav__link active">Личный кабинет</a>
+                <a href="index.html" class="btn-secondary" id="logoutBtn">Выйти</a>
+            </div>
+        </div>
+    </header>
+
+    <section class="hero" style="padding: 100px 0; background: none;">
+        <div class="container">
+            <div class="auth-card" style="max-width: 900px; text-align: left;">
+                <h2 class="section-title" style="text-align: center; margin-bottom: 40px;">
+                    Привет, <span id="usernameDisplay">пользователь</span>!
+                </h2>
+
+                <div class="profile-tabs">
+                    <button class="tab-btn active" data-tab="orders">Мои заказы</button>
+                    <button class="tab-btn" data-tab="contacts">Контактные данные</button>
+                    <a href="order-create.html" class="tab-btn">Создать заказ</a>
+                </div>
+
+                <div id="orders" class="tab-content active">
+                    <h3 style="font-size: 28px; margin-bottom: 30px;">Мои заказы</h3>
+                    <div id="ordersList">
+                        <p style="text-align: center; opacity: 0.8;">Загрузка заказов...</p>
+                    </div>
+                </div>
+
+                <div id="contacts" class="tab-content">
+                    <h3 style="font-size: 28px; margin-bottom: 30px;">Контактные данные</h3>
+                    <form id="contactsForm">
+                        <input type="text" placeholder="ФИО" class="auth-input" id="fullName" required>
+                        <input type="tel" placeholder="Телефон" class="auth-input" id="phone" required>
+                        <input type="text" placeholder="Адрес доставки" class="auth-input" id="address">
+                        <button type="submit" class="btn-primary"
+                            style="width: 100%; margin-top: 20px;">Сохранить</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <script>
+        function getAuthHeaders() {
+            const token = localStorage.getItem('access_token');
+            console.log('Токен из localStorage:', token ? token.substring(0, 20) + '...' : 'ТОКЕН ОТСУТСТВУЕТ');
+            if (!token) {
+                alert('Сессия истекла. Войдите заново.');
+                window.location.href = 'login.html';
+                return {};
+            }
+            return { 'Authorization': `Bearer ${token}` };
+        }
+
+        async function loadMyOrders() {
+            const container = document.getElementById('ordersList');
+            container.innerHTML = '<p>Загрузка...</p>';
+
+            try {
+                console.log('Запрос на /orders/my');
+                const res = await fetch('http://127.0.0.1:8000/orders/my', {
+                    method: 'GET',
+                    headers: getAuthHeaders()
+                });
+
+                console.log('Статус ответа:', res.status, res.statusText);
+
+                if (!res.ok) {
+                    if (res.status === 401 || res.status === 403) {
+                        console.error('401/403 → токен недействителен');
+                        localStorage.removeItem('access_token');
+                        alert('Сессия истекла. Войдите заново.');
+                        window.location.href = 'login.html';
+                    }
+                    const err = await res.json();
+                    throw new Error(err.detail || `Ошибка ${res.status}`);
+                }
+
+                const orders = await res.json();
+                console.log('Получено заказов:', orders.length, orders);
+
+                if (orders.length === 0) {
+                    container.innerHTML = `<p style="text-align: center; opacity: 0.8;">У вас пока нет заказов</p>`;
+                    return;
+                }
+
+                container.innerHTML = orders.map(order => `
+                    <div style="background: rgba(255,255,255,0.1); padding: 20px; border-radius: 20px; margin-bottom: 20px;">
+                        <strong>Заказ #${order.id}</strong> — ${order.status.toUpperCase()}<br>
+                        Создан: ${new Date(order.created_at).toLocaleString('ru-RU')}<br>
+                        Позиций: ${order.items?.length || 0} | Сумма: ${order.total_price || 0} ₽<br>
+                        Доставка: ${order.delivery_method} ${order.delivery_address ? `(${order.delivery_address})` : ''}<br>
+                        ${order.comment ? `<small>Комментарий: ${order.comment}</small>` : ''}<br>
+                        ${order.status === 'new' ? `
+                            <button onclick="cancelOrder(${order.id})" style="margin-top:10px; background:#FF3B30; color:white; border:none; padding:8px 16px; border-radius:8px; cursor:pointer;">
+                                Отменить
+                            </button>
+                        ` : '<small>Отмена недоступна</small>'}
+                    </div>
+                `).join('');
+            } catch (err) {
+                console.error('Ошибка загрузки заказов:', err);
+                container.innerHTML = `<p style="color: #FF3B30;">Ошибка: ${err.message}<br>Проверь консоль и токен.</p>`;
+            }
+        }
+
+        async function cancelOrder(orderId) {
+            if (!confirm('Отменить заказ?')) return;
+            try {
+                const res = await fetch(`http://127.0.0.1:8000/orders/${orderId}`, {
+                    method: 'DELETE',
+                    headers: getAuthHeaders()
+                });
+                if (res.ok) {
+                    alert('Заказ отменён');
+                    loadMyOrders();
+                } else {
+                    alert('Не удалось отменить');
+                }
+            } catch (e) {
+                alert('Ошибка сети');
+            }
+        }
+
+        // Выход
+        document.getElementById('logoutBtn').addEventListener('click', e => {
+            e.preventDefault();
+            if (confirm('Выйти?')) {
+                localStorage.removeItem('access_token');
+                window.location.href = 'index.html';
+            }
+        });
+
+        // Запуск при загрузке
+        document.addEventListener('DOMContentLoaded', () => {
+            console.log('Запуск загрузки заказов...');
+            loadMyOrders();
+        });
+    </script>
+</body>
+
+</html>

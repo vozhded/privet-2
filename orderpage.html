@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="ru">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Оформление заказа</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+    <header>
+        <h1>Оформление заказа</h1>
+        <nav>
+            <a href="mainpage.html">Главная</a>
+            <a href="#order">Оформить заказ</a>
+            <a href="index.html#services">Услуги</a>
+            <a href="index.html#about">О нас</a>
+            <a href="index.html#contact">Контакты</a>
+        </nav>
+    </header>
+
+    <section id="order" class="order-section">
+        <h2>Оформление заказа</h2>
+        <form class="order-form">
+            <div class="form-group">
+                <label for="name">Загрузка модели</label>
+                <input type="file" id="name" accept=".stl,.obj" multiple>
+            </div>
+            <div class="form-group">
+                <label for="details">Детали заказа</label>
+                <input type="text" id="details" placeholder="Введите детали">
+            </div>
+            <div class="form-group">
+                <label for="quantity">Выбор доставки</label>
+                <input type="text" id="quantity" placeholder="Введите способ доставки">
+            </div>
+            <div class="form-group">
+                <label for="payment">Выбор оплаты</label>
+                <input type="text" id="payment" placeholder="Введите способ оплаты">
+            </div>
+            <div class="form-group">
+                <label for="comments">Оплата заказа</label>
+                <input type="text" id="comments" placeholder="Введите сумму">
+            </div>
+            <button type="submit" class="btn">Отправить заказ</button>
+        </form>
+    </section>
+
+    <footer>
+        <p>&copy; 2025 Услуги 3D Печати</p>
+    </footer>
+</body>
+
+</html>

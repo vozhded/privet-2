@@ -1,0 +1,76 @@
+acuryo@MacBook-Pro-Dmitrij fcuk % tree     
+.
+├── backend
+│   ├── app
+│   │   ├── __init__.py
+│   │   ├── core
+│   │   │   ├── __init__.py
+│   │   │   ├── dependencies.py
+│   │   │   └── security.py
+│   │   ├── database.py
+│   │   ├── main.py
+│   │   ├── models.py
+│   │   ├── routers
+│   │   │   ├── __init__.py
+│   │   │   ├── admin.py
+│   │   │   ├── auth.py
+│   │   │   ├── orders.py
+│   │   │   └── users.py
+│   │   └── schemas.py
+│   ├── requirements.txt
+│   └── uploads
+│       ├── models
+│       │   ├── 19a83072-9c42-4bd3-8a82-e8fe51803c70.3mf
+│       │   ├── 2fb43b22-7235-4d84-b1d1-f6f3f54c51fa.3mf
+│       │   ├── 42adb1f7-b4ea-4335-9f55-139e38dac4e6.3mf
+│       │   ├── 5f618b89-d837-4d27-a820-9c54b420c9b6.3mf
+│       │   ├── 6226d64a-c3fe-411f-93ea-7d7c1a7d6e5e.3mf
+│       │   ├── 690ce64b-e0fa-422c-9e4d-8623734e7e66.3mf
+│       │   ├── 74fcd9a3-40f6-4a2b-abf0-9731d95e84c4.3mf
+│       │   ├── 7dea8181-337b-40e0-b8f1-345dc65178e6.3mf
+│       │   ├── b72b88bf-10a8-4dbf-bf15-0d33f3733f77.3mf
+│       │   ├── c9ef124a-14fc-467a-8be8-3273c33fd74a.3mf
+│       │   └── fb9a4d35-5e75-4b12-97b6-2e11fc00c237.3mf
+│       └── photos
+├── code.txt
+├── docker-compose.yml
+├── frontend
+│   ├── director.html
+│   ├── images
+│   │   ├── 1.png
+│   │   ├── delivery_1.png
+│   │   ├── delivery_2 .png
+│   │   ├── delivery_2 (2).png
+│   │   ├── dsadsa.png
+│   │   ├── icons
+│   │   │   ├── delivery0.png
+│   │   │   ├── jdun0.png
+│   │   │   ├── payment0.png
+│   │   │   └── upload0.png
+│   │   ├── Image.png
+│   │   ├── jdun_1.png
+│   │   ├── logo.png
+│   │   ├── logo2.png
+│   │   ├── pay,ment.png
+│   │   ├── payment_1.png
+│   │   ├── payment.jpg
+│   │   ├── receive.png
+│   │   ├── upload_1.png
+│   │   ├── upload.png
+│   │   ├── Без имени.png
+│   │   ├── Слой 1.png
+│   │   └── Слой 2.png
+│   ├── index.html
+│   ├── login.html
+│   ├── manager.html
+│   ├── order-create.html
+│   ├── packer.html
+│   ├── profile.html
+│   ├── register.html
+│   ├── script.js
+│   └── style.css
+├── uploads
+│   └── models
+└── venv
+
+

@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="ru">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Оформление заказа | 3D Print Platform</title>
+    <link rel="stylesheet" href="style.css" />
+    <link href="https://fonts.googleapis.com/css2?family=DotGothic16&display=swap" rel="stylesheet">
+</head>
+
+<body>
+    <header class="header">
+        <div class="container header__inner">
+            <div class="logo">
+                <img src="images/logo.png" alt="Logo" class="logo__img">
+            </div>
+            <nav class="nav">
+                <a href="index.html" class="nav__link">Главная</a>
+                <a href="profile.html" class="nav__link">Личный кабинет</a>
+            </nav>
+            <div class="auth-buttons">
+                <a href="profile.html" class="nav__link active">Личный кабинет</a>
+                <a href="#" class="btn-secondary" id="logoutBtn">Выйти</a>
+            </div>
+        </div>
+    </header>
+
+    <section class="hero" style="padding: 80px 0; background: none;">
+        <div class="container">
+            <div class="auth-card" style="max-width: 900px;">
+                <h2 class="section-title" style="text-align: center; margin-bottom: 40px;">Оформление заказа</h2>
+
+                <div class="progress-bar">
+                    <div class="step-indicator active" data-step="1">1</div>
+                    <div class="step-line"></div>
+                    <div class="step-indicator" data-step="2">2</div>
+                    <div class="step-line"></div>
+                    <div class="step-indicator" data-step="3">3</div>
+                    <div class="step-line"></div>
+                    <div class="step-indicator" data-step="4">4</div>
+                </div>
+
+                <!-- ШАГ 1: Параметры модели (без загрузки файла) -->
+                <div id="step1" class="order-step active">
+                    <h3>Шаг 1: Параметры модели</h3>
+                    <p style="text-align: center; opacity: 0.9; margin-bottom: 20px;">
+                        Укажите количество, тип филамента и цвет
+                    </p>
+
+                    <div id="modelsConfig">
+                        <!-- Здесь будет одна модель по умолчанию -->
+                        <div class="model-config-item">
+                            <h4>Модель</h4>
+                            <div class="model-options-grid">
+                                <div>
+                                    <label>Количество</label>
+                                    <input type="number" min="1" value="1" class="auth-input" id="quantity" required>
+                                </div>
+                                <div>
+                                    <label>Филамент</label>
+                                    <select class="auth-input" id="filament_type">
+                                        <option>PLA</option>
+                                        <option>ABS</option>
+                                        <option>PETG</option>
+                                        <option>Resin</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label>Цвет</label>
+                                    <select class="auth-input" id="filament_color">
+                                        <option>Чёрный</option>
+                                        <option>Белый</option>
+                                        <option>Красный</option>
+                                        <option>Синий</option>
+                                        <option>Зелёный</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <button type="button" class="btn-primary next-btn" id="next1"
+                        style="margin-top: 40px; width: 100%; padding: 18px; font-size: 20px;">
+                        Далее →
+                    </button>
+                </div>
+
+                <!-- Шаг 2: Доставка и комментарий -->
+                <div id="step2" class="order-step">
+                    <h3>Шаг 2: Доставка и комментарий</h3>
+                    <select id="deliveryMethod" class="auth-input" style="width: 100%; margin-bottom: 20px;">
+                        <option>Самовывоз (Москва)</option>
+                        <option>Курьер по Москве</option>
+                        <option>Почта России</option>
+                    </select>
+                    <input type="text" id="deliveryAddress" placeholder="Адрес доставки" class="auth-input">
+                    <textarea id="comment" placeholder="Комментарий к заказу" class="auth-input"
+                        style="height: 120px; margin-top: 20px;"></textarea>
+
+                    <button type="button" class="btn-secondary prev-btn">← Назад</button>
+                    <button type="button" class="btn-primary next-btn" id="next2">Далее →</button>
+                </div>
+
+                <!-- Шаг 3: Подтверждение (теперь шаг 3) -->
+                <div id="step3" class="order-step">
+                    <h3>Шаг 3: Подтверждение заказа</h3>
+                    <div id="orderSummary" style="margin-bottom: 30px;"></div>
+                    <p style="font-size: 20px; margin-bottom: 30px;">Итого: <strong id="totalPrice">0 ₽</strong></p>
+
+                    <button type="button" class="btn-secondary prev-btn">← Назад</button>
+                    <button type="button" class="btn-primary" id="confirmOrder"
+                        style="width: 100%; padding: 20px; font-size: 22px;">
+                        Подтвердить заказ
+                    </button>
+
+                    <div id="successMessage" style="display: none; text-align: center; margin-top: 40px;">
+                        <p style="color: #0f0; font-size: 28px;">Заказ успешно создан!</p>
+                        <p style="margin-top: 20px;"></p>
+                        <a href="profile.html" class="btn-primary"
+                            style="margin-top: 20px; display: inline-block; padding: 16px 40px;">Перейти в личный
+                            кабинет</a>
+                    </div>
+                </div>
+
+                <!-- Убрали шаг 4, теперь 3 шага -->
+            </div>
+        </div>
+    </section>
+
+    <script>
+        let currentStep = 1;
+
+        function showStep(step) {
+            document.querySelectorAll('.order-step').forEach(s => s.classList.remove('active'));
+            document.getElementById(`step${step}`).classList.add('active');
+
+            document.querySelectorAll('.step-indicator').forEach((ind, i) => {
+                ind.classList.toggle('active', i + 1 <= step);
+                if (i < 2) { // теперь 3 шага
+                    const line = ind.nextElementSibling;
+                    if (line) line.style.background = i + 1 < step ? '#FF3B30' : 'rgba(255,255,255,0.2)';
+                }
+            });
+
+            currentStep = step;
+            if (step === 3) updateSummary();
+        }
+
+        function getAuthHeaders() {
+            const token = localStorage.getItem('access_token');
+            if (!token) {
+                alert('Сначала войдите');
+                window.location.href = 'login.html';
+                return {};
+            }
+            return { 'Authorization': `Bearer ${token}` };
+        }
+
+        // Summary
+        function updateSummary() {
+            const container = document.getElementById('orderSummary');
+            const qty = document.getElementById('quantity')?.value || 1;
+            const ftype = document.getElementById('filament_type')?.value || 'PLA';
+            const color = document.getElementById('filament_color')?.value || 'Чёрный';
+            const method = document.getElementById('deliveryMethod')?.value || '—';
+            const addr = document.getElementById('deliveryAddress')?.value || '';
+            const comm = document.getElementById('comment')?.value || '';
+
+            let html = `
+                <h4>Параметры модели:</h4>
+                <p>Количество: ${qty} шт</p>
+                <p>Филамент: ${ftype} / ${color}</p>
+                <h4>Доставка:</h4>
+                <p>${method}${addr ? ` (${addr})` : ''}</p>
+            `;
+            if (comm) html += `<p><b>Комментарий:</b> ${comm}</p>`;
+
+            container.innerHTML = html;
+            document.getElementById('totalPrice').textContent = '0 ₽ (имитация)';
+        }
+
+        // Подтверждение (имитация POST /orders/)
+        document.getElementById('confirmOrder').addEventListener('click', async () => {
+            const payload = {
+                items: [{
+                    filename: "fake-model.stl",           // имитация
+                    original_name: "Модель без файла",
+                    quantity: parseInt(document.getElementById('quantity')?.value) || 1,
+                    filament_type: document.getElementById('filament_type')?.value || 'PLA',
+                    filament_color: document.getElementById('filament_color')?.value || 'Чёрный'
+                }],
+                delivery_method: document.getElementById('deliveryMethod')?.value || 'Самовывоз (Москва)',
+                delivery_address: document.getElementById('deliveryAddress')?.value || null,
+                comment: document.getElementById('comment')?.value || null
+            };
+
+            try {
+                console.log('Отправка заказа:', payload);
+                const res = await fetch('http://127.0.0.1:8000/orders/', {
+                    method: 'POST',
+                    headers: {
+                        ...getAuthHeaders(),
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(payload)
+                });
+
+                if (!res.ok) throw new Error(await res.text());
+
+                document.getElementById('confirmOrder').style.display = 'none';
+                document.getElementById('successMessage').style.display = 'block';
+            } catch (err) {
+                console.error(err);
+                alert('Ошибка: ' + err.message);
+            }
+        });
+
+        // Навигация
+        document.querySelectorAll('.next-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                if (currentStep < 3) showStep(currentStep + 1);
+            });
+        });
+
+        document.querySelectorAll('.prev-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                if (currentStep > 1) showStep(currentStep - 1);
+            });
+        });
+
+        // Выход
+        document.getElementById('logoutBtn')?.addEventListener('click', e => {
+            e.preventDefault();
+            if (confirm('Выйти?')) {
+                localStorage.removeItem('access_token');
+                window.location.href = 'index.html';
+            }
+        });
+
+        document.addEventListener('DOMContentLoaded', () => {
+            showStep(1);
+        });
+    </script>
+</body>
+
+</html>
